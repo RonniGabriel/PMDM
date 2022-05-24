@@ -41,8 +41,8 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
     public  float maxTime = Float.parseFloat(handle.readString());
 
     //SCORE EN FICHERO
-    public FileHandle handleScore = Gdx.files.local("gameScore.txt");
-    public int maxScore = Integer.parseInt(handleScore.readString());
+    // TODO  public  FileHandle handleScore = Gdx.files.local("gameScore.txt") ;
+    // TODO  public float maxScore = FLoat.parseFloat(handle.readString());
 
     private TextureAtlas textureAtlas;
     private FPSLogger fpsLogger;
@@ -99,6 +99,7 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
     private final Rectangle scoreBoundingBox = new Rectangle();
 
     private int score;
+    public int highScore;
     private GlyphLayout actualScore;
     private GlyphLayout recordScore;
 
@@ -236,13 +237,13 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
 
         //TIMER
         time += Gdx.graphics.getDeltaTime();
-        String actualTimeString = String.format("TIME: %ds", (int) time);
-        String recordTime = String.format("HIGH-TIME: %ds", (int) maxTime);
+        String actualTimeString = (String.format("TIME:" + "%d", (int) time) + "s");
+        String recordTime = (String.format("HIGH-TIME:" + "%d", (int) maxTime) + "s");
         counter = new GlyphLayout(game.fuenteScore, actualTimeString);
         maxTimePlayed = new GlyphLayout(game.fuenteScore, recordTime);
         // SCORE
-        String scoreString = String.format("SCORE: %dpts", score) ;
-        String maxScoreString = String.format("HIGHSCORE: %dpts", maxScore);
+        String scoreString = (String.format("SCORE:" + "%d", score) + " pts");
+        String maxScoreString = (String.format("HIGHSCORE: " + "%d", highScore) + " pts");
         actualScore = new GlyphLayout(game.fuenteScore, scoreString);
         recordScore = new GlyphLayout(game.fuenteScore, maxScoreString);
 
@@ -319,11 +320,16 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
             music.dispose();
             gameover=true;
             game.setScreen(new GameOver(game));
+<<<<<<< HEAD
             if (time > maxTime) {
                 handle.writeString(Float.toString(time), false);
             }
             if (score > maxScore) {
                 handleScore.writeString(Integer.toString(score), false);
+=======
+            if(time > maxTime){
+                handle.writeString(Float.toString(time),false);
+>>>>>>> parent of 7c95f81 (fixes several maxScore issues)
             }
 
         }
