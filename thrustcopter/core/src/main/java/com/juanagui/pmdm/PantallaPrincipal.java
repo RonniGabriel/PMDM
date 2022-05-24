@@ -37,12 +37,12 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
     public static final int GRAVITY = -8;
 
     //VARIABLES PARA ESCRIBIR EL TIEMPO MÁXIMO JUGADO (TIMER)
-    public  FileHandle handle = Gdx.files.local("gameTime.txt") ;
-    public  float maxTime = Float.parseFloat(handle.readString());
+    public FileHandle handle = Gdx.files.local("gameTime.txt");
+    public float maxTime = Float.parseFloat(handle.readString());
 
     //SCORE EN FICHERO
-    // TODO  public  FileHandle handleScore = Gdx.files.local("gameScore.txt") ;
-    // TODO  public float maxScore = FLoat.parseFloat(handle.readString());
+    public  FileHandle handleScore = Gdx.files.local("gameScore.txt") ;
+    public float maxScore = Integer.parseInt(handleScore.readString());
 
     private TextureAtlas textureAtlas;
     private FPSLogger fpsLogger;
@@ -91,7 +91,7 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
     private Sound crashSound;
 
     //TIMER
-    float time =0;
+    float time = 0;
     private GlyphLayout counter;
     private GlyphLayout maxTimePlayed;
 
@@ -111,6 +111,11 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
         this.game = game;
 
     }
+
+    public PantallaPrincipal() {
+
+    }
+
     @Override
     public void show() {
         fpsLogger = new FPSLogger();       // Nos dice los frames por segundo a los que va el juego
@@ -173,6 +178,7 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
         }
         drawScene();
     }
+
     private void updateScene() throws IOException {
 
         // CESPED
@@ -237,13 +243,13 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
 
         //TIMER
         time += Gdx.graphics.getDeltaTime();
-        String actualTimeString = (String.format("TIME:" + "%d", (int) time) + "s");
-        String recordTime = (String.format("HIGH-TIME:" + "%d", (int) maxTime) + "s");
+        String actualTimeString = String.format("TIME: %ds", (int) time);
+        String recordTime = String.format("HIGH-TIME: %ds", (int) maxTime);
         counter = new GlyphLayout(game.fuenteScore, actualTimeString);
         maxTimePlayed = new GlyphLayout(game.fuenteScore, recordTime);
         // SCORE
-        String scoreString = (String.format("SCORE:" + "%d", score) + " pts");
-        String maxScoreString = (String.format("HIGHSCORE: " + "%d", highScore) + " pts");
+        String scoreString = String.format("SCORE: %ds", score);
+        String maxScoreString = String.format("HIGHSCORE:%ds", highScore);
         actualScore = new GlyphLayout(game.fuenteScore, scoreString);
         recordScore = new GlyphLayout(game.fuenteScore, maxScoreString);
 
@@ -297,41 +303,37 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
         game.batch.draw(planeAnimation.getKeyFrame(planeAnimTime), planePosition.x, planePosition.y);
 
         //TIMER
-        game.fuenteScore.draw(game.batch, counter,570,HEIGHT-430);
+        game.fuenteScore.draw(game.batch, counter, 570, HEIGHT - 430);
 
         //TIEMPO MAXIMO JUGADO
-        game.fuenteScore.draw(game.batch, maxTimePlayed,570,HEIGHT-400);
+        game.fuenteScore.draw(game.batch, maxTimePlayed, 570, HEIGHT - 400);
 
         //SCORE
-        game.fuenteScore.draw(game.batch, actualScore,570,HEIGHT-80 );
+        game.fuenteScore.draw(game.batch, actualScore, 570, HEIGHT - 80);
 
         //SCORE MAX
-        game.fuenteScore.draw(game.batch, recordScore,570,HEIGHT-50 );
+        game.fuenteScore.draw(game.batch, recordScore, 570, HEIGHT - 50);
 
 
         // CERRAMOS
         game.batch.end();
     }
 
-    private void gameOver(){
-        Gdx.app.log(PantallaPrincipal.class.getName(),"Collison-GameOver");
-        if(!gameover) {
+    private void gameOver() {
+        Gdx.app.log(PantallaPrincipal.class.getName(), "Collison-GameOver");
+        if (!gameover) {
             crashSound.play();
             music.dispose();
-            gameover=true;
+            gameover = true;
             game.setScreen(new GameOver(game));
-<<<<<<< HEAD
+
             if (time > maxTime) {
                 handle.writeString(Float.toString(time), false);
             }
             if (score > maxScore) {
                 handleScore.writeString(Integer.toString(score), false);
-=======
-            if(time > maxTime){
-                handle.writeString(Float.toString(time),false);
->>>>>>> parent of 7c95f81 (fixes several maxScore issues)
-            }
 
+            }
         }
     }
 
@@ -352,41 +354,52 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
         pillars.add(tmpPosition);
     }
 
+
     @Override
     public void hide() {
         Gdx.input.setInputProcessor(null);
     }
+
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
         planeVelocity.add(0, PLANE_TAP_SPEED);
         return true;
     }
+
     @Override
     public boolean keyDown(int keycode) {
         return false;
     }
+
     @Override
     public boolean keyUp(int keycode) {
         return false;
     }
+
     @Override
     public boolean keyTyped(char character) {
         return false;
     }
+
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
         return false;
     }
+
     @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
         return false;
     }
+
     @Override
     public boolean mouseMoved(int screenX, int screenY) {
         return false;
     }
+
     @Override
     public boolean scrolled(float amountX, float amountY) {
         return false;
-    }}
+    }
+}
+
 
