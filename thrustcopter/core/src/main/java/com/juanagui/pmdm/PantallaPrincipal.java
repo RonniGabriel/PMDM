@@ -320,7 +320,7 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
             gameover=true;
             game.setScreen(new GameOver(game));
             if (time > maxTime) {
-                handleTime.writeString(Float.toString(time), false);
+                handle.writeString(Float.toString(time), false);
             }
             if (score > maxScore) {
                 handleScore.writeString(Integer.toString(score), false);
