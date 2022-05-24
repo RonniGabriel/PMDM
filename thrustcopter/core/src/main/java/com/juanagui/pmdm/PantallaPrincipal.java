@@ -223,7 +223,7 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
             //SCORE
             scoreBoundingBox.set(pillar.x + 10, 0, 1, HEIGHT);
             if (planeBoundingBox.overlaps(scoreBoundingBox)) {
-                score += 1;
+                score ++;
             }
         }
 
