@@ -245,6 +245,7 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
         // SCORE
 
         String scoreString = String.format("SCORE: %ds", score);
+        String maxScoreString = String.format("HIGHSCORE:%ds", maxScore);
         actualScore = new GlyphLayout(game.fuenteScore, scoreString);
         recordScore = new GlyphLayout(game.fuenteScore, maxScoreString);
 
