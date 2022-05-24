@@ -29,6 +29,7 @@ public class MainGame extends Game {
         shapeRenderer = new ShapeRenderer();
         fuenteScore = new BitmapFont(Gdx.files.internal("FuenteCreada.fnt"));
         fuenteUno =  new BitmapFont(Gdx.files.internal("FuenteCreada.fnt"));
+        fuenteScore.getData().setScale(0.5f);
         fuenteDos = new BitmapFont(Gdx.files.internal("FuenteCreada.fnt"));
         fuenteDos.setColor(Color.YELLOW);
         fuenteUno.setColor(Color.MAGENTA);

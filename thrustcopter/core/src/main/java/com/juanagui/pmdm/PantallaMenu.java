@@ -36,6 +36,7 @@ public class PantallaMenu extends ScreenAdapter {
         game.batch.begin();
         game.batch.draw(game.imgFondo,0,-100);
         game.fuenteUno.draw(game.batch, " -> To start press Enter ", Gdx.graphics.getWidth() * .19f, Gdx.graphics.getHeight() * .25f);
+
         game.fuenteUno.draw(game.batch, " -> To exit  press Escape ", Gdx.graphics.getWidth() * .19f, Gdx.graphics.getHeight() * .15f);
         game.batch.end();
     }

@@ -10,7 +10,6 @@ import com.badlogic.gdx.graphics.FPSLogger;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -27,30 +26,25 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
 
     MainGame game;
 
+    private static TextureRegion aboveGrassTextureRegion;
+    private static TextureRegion belowGrassTextureRegion;
     // ATRIBUTOS
-
     public static final float WIDTH = 800f;
     public static final float HEIGHT = 480f;
     public static final float TERRAIN_SPEED_PPS = 200f;
     public static final float BACKGROUND_SPEED_PPS = 20;
     public static final float PLANE_TAP_SPEED = 200f;
     public static final int GRAVITY = -8;
-   // public static final String path= System.getProperty("user.dir"+"/" + "Seconds.txt");
-   //public static final String path1= ("C:/Users/Nashj/Desktop/Seconds.txt");
 
     //VARIABLES PARA ESCRIBIR EL TIEMPO MÁXIMO JUGADO (TIMER)
-   public  FileHandle handle = Gdx.files.local("gameTime.txt") ;
-   public  float maxTime = Float.parseFloat(handle.readString());
+    public  FileHandle handle = Gdx.files.local("gameTime.txt") ;
+    public  float maxTime = Float.parseFloat(handle.readString());
 
-   //SCORE EN FICHERO
-
-    //public  FileHandle scoreFile = Gdx.files.local("score.txt") ;
-    //public  float maxScore = Float.parseFloat(scoreFile.readString());
-
-
+    //SCORE EN FICHERO
+    // TODO  public  FileHandle handleScore = Gdx.files.local("gameScore.txt") ;
+    // TODO  public float maxScore = FLoat.parseFloat(handle.readString());
 
     private TextureAtlas textureAtlas;
-    public BitmapFont font;
     private FPSLogger fpsLogger;
 
     //CAMARA VISION
@@ -59,12 +53,9 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
     // AJUSTA LA CAMARA AL TAMAÑO DE LA PANTAllA PARA QUE NO DEFORME LAS IMÁGENES
     private FitViewport viewport;
 
-
-
     // ATLAS DE TEXTURAS
     private TextureRegion backgroundTextureRegion;
-    private TextureRegion aboveGrassTextureRegion;
-    private TextureRegion belowGrassTextureRegion;
+
     private float terrainOffset = 0f;
     private float backgroundOffset = 0f;
 
@@ -95,35 +86,34 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
     private final Rectangle planeBoundingBox = new Rectangle();
     private final Rectangle pillarBoundingBox = new Rectangle();
 
-
-
-
     //MÚSICA
     private Music music;
     private Sound crashSound;
 
     //TIMER
-    float totalTime =0;
-    String totalSeconds ;
+    float time =0;
     private GlyphLayout counter;
     private GlyphLayout maxTimePlayed;
 
     //SCORE
     private final Rectangle scoreBoundingBox = new Rectangle();
+
     private int score;
-    private GlyphLayout totalScore;
-
-
+    public int highScore;
+    private GlyphLayout actualScore;
+    private GlyphLayout recordScore;
 
     // GAME OVER
     private Boolean gameover = false;
+
+
     public PantallaPrincipal(MainGame game) {
-       this.game = game;
+        this.game = game;
 
     }
     @Override
     public void show() {
-        fpsLogger = new FPSLogger();       // Nos dic e los frames por segundo a los que va el juego
+        fpsLogger = new FPSLogger();       // Nos dice los frames por segundo a los que va el juego
         camera = new OrthographicCamera();
         camera.position.set(WIDTH / 2f, HEIGHT / 2F, 0);
         viewport = new FitViewport(WIDTH, HEIGHT, camera);
@@ -131,12 +121,7 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
 
         //TEXTURA ATLAS (CONTIENE TODAS LAS IMAGENES TEXTURAS EN UN SOLO DOCUMENTO)
         textureAtlas = new TextureAtlas(Gdx.files.internal("ThrustCopter.pack  "));
-
-        // TEXTURAS POR REGION -------------
-
-        //FONDO
         backgroundTextureRegion = textureAtlas.findRegion("background");
-
         //SUELO
         belowGrassTextureRegion = textureAtlas.findRegion("groundGrass");
         aboveGrassTextureRegion = new TextureRegion(belowGrassTextureRegion);
@@ -164,18 +149,14 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
         // añadimos pilares
         addPillar();
 
-
         // MUSICA
         crashSound = Gdx.audio.newSound(Gdx.files.internal("sounds/crash.ogg"));
-
         music = Gdx.audio.newMusic(Gdx.files.internal("sounds/journey.mp3"));
         music.setLooping(true);
         music.play();
 
         Gdx.input.setInputProcessor(this);
     }
-
-
 
     @Override
     public void resize(int width, int height) {
@@ -191,9 +172,7 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
             e.printStackTrace();
         }
         drawScene();
-
     }
-
     private void updateScene() throws IOException {
 
         // CESPED
@@ -201,7 +180,6 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
         if (terrainOffset <= -belowGrassTextureRegion.getRegionWidth()) {
             terrainOffset = 0f;
         }
-
         planeVelocity.add(gravity);
         planeVelocity.scl(damping);
         planePosition.mulAdd(planeVelocity, Gdx.graphics.getDeltaTime());
@@ -217,7 +195,6 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
                 planePosition.y < belowGrassTextureRegion.getRegionHeight() / 2f) {
             gameOver();
         }
-
         //POSICION DE LOS PILARES EN MOVIMIENTO
 
         for (Vector2 pillar : pillars) {
@@ -227,11 +204,11 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
 
             // pilares desde abajo
             if (pillar.y == 1) {
-                pillarBoundingBox.set(pillar.x+30, 0, pillarUp.getRegionWidth()-60, pillarUp.getRegionHeight());
+                pillarBoundingBox.set(pillar.x + 30, 0, pillarUp.getRegionWidth() - 60, pillarUp.getRegionHeight());
 
                 //pilares desde arriba
             } else {
-                pillarBoundingBox.set(pillar.x+30, HEIGHT - pillarDown.getRegionHeight(), pillarDown.getRegionWidth()-60, pillarDown.getRegionHeight());
+                pillarBoundingBox.set(pillar.x + 30, HEIGHT - pillarDown.getRegionHeight(), pillarDown.getRegionWidth() - 60, pillarDown.getRegionHeight());
             }
 
             // VEMOS SI SE CHOCAN LOS RECTANGULOS (con el metodo overLaps())
@@ -243,15 +220,11 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
                 pillars.removeValue(pillar, true);
             }
             //SCORE
-            scoreBoundingBox.set(pillar.x+10, 0, 1, HEIGHT);
-            if(planeBoundingBox.overlaps(scoreBoundingBox)){
-                score+=1;
-                  //String scoreString=(Integer.toString(score));
-
+            scoreBoundingBox.set(pillar.x + 10, 0, 1, HEIGHT);
+            if (planeBoundingBox.overlaps(scoreBoundingBox)) {
+                score += 1;
             }
         }
-        String scoreString = (String.format("Puntuacion:"+"%d", score));
-        totalScore=new GlyphLayout(game.fuenteScore,scoreString);
 
         if (lastPillarPosition.x < NEW_PILLAR_POSITION_THRESHOLD) {
             addPillar();
@@ -263,13 +236,16 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
             backgroundOffset = 0f;
 
         //TIMER
-
-        totalTime+=Gdx.graphics.getDeltaTime();
-        totalSeconds = (String.format("Tiempo:"+"%d", (int)totalTime)+"s");
-        counter=new GlyphLayout(game.fuenteScore,totalSeconds);
-
-        //MOSTRAR MAX TIEMPO JUGADO
-        maxTimePlayed=new GlyphLayout(game.fuenteScore, Integer.toString((int)maxTime));
+        time += Gdx.graphics.getDeltaTime();
+        String actualTimeString = (String.format("TIME:" + "%d", (int) time) + "s");
+        String recordTime = (String.format("HIGH-TIME:" + "%d", (int) maxTime) + "s");
+        counter = new GlyphLayout(game.fuenteScore, actualTimeString);
+        maxTimePlayed = new GlyphLayout(game.fuenteScore, recordTime);
+        // SCORE
+        String scoreString = (String.format("SCORE:" + "%d", score) + " pts");
+        String maxScoreString = (String.format("HIGHSCORE: " + "%d", highScore) + " pts");
+        actualScore = new GlyphLayout(game.fuenteScore, scoreString);
+        recordScore = new GlyphLayout(game.fuenteScore, maxScoreString);
 
     }
 
@@ -321,16 +297,16 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
         game.batch.draw(planeAnimation.getKeyFrame(planeAnimTime), planePosition.x, planePosition.y);
 
         //TIMER
-        game.fuenteScore.draw(game.batch, totalSeconds,580,HEIGHT-400);
+        game.fuenteScore.draw(game.batch, counter,570,HEIGHT-430);
 
         //TIEMPO MAXIMO JUGADO
-        game.fuenteScore.draw(game.batch, maxTimePlayed,50,HEIGHT-60);
+        game.fuenteScore.draw(game.batch, maxTimePlayed,570,HEIGHT-400);
 
         //SCORE
-        game.fuenteScore.draw(game.batch,totalScore,550,HEIGHT-60 );
-        //SCORE MAX
-       // game.font.draw(game.batch,scoring,WIDTH/6,HEIGHT);
+        game.fuenteScore.draw(game.batch, actualScore,570,HEIGHT-80 );
 
+        //SCORE MAX
+        game.fuenteScore.draw(game.batch, recordScore,570,HEIGHT-50 );
 
 
         // CERRAMOS
@@ -341,11 +317,11 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
         Gdx.app.log(PantallaPrincipal.class.getName(),"Collison-GameOver");
         if(!gameover) {
             crashSound.play();
+            music.dispose();
             gameover=true;
             game.setScreen(new GameOver(game));
-            if(totalTime>maxTime){
-                handle.writeString(Float.toString(totalTime),false);
-
+            if(time > maxTime){
+                handle.writeString(Float.toString(time),false);
             }
 
         }
@@ -368,53 +344,41 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
         pillars.add(tmpPosition);
     }
 
-
     @Override
     public void hide() {
         Gdx.input.setInputProcessor(null);
     }
-
-
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
         planeVelocity.add(0, PLANE_TAP_SPEED);
         return true;
     }
-
     @Override
     public boolean keyDown(int keycode) {
         return false;
     }
-
     @Override
     public boolean keyUp(int keycode) {
         return false;
     }
-
     @Override
     public boolean keyTyped(char character) {
         return false;
     }
-
-
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
         return false;
     }
-
     @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
         return false;
     }
-
     @Override
     public boolean mouseMoved(int screenX, int screenY) {
         return false;
     }
-
     @Override
     public boolean scrolled(float amountX, float amountY) {
         return false;
-    }
+    }}
 
-}
