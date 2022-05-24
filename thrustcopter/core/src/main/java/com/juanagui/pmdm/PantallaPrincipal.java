@@ -41,8 +41,9 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
     public float maxTime = Float.parseFloat(handle.readString());
 
     //SCORE EN FICHERO
-    public  FileHandle handleScore = Gdx.files.local("gameScore.txt") ;
-    public float maxScore = Integer.parseInt(handleScore.readString());
+
+    public FileHandle handleScore = Gdx.files.local("gameScore.txt");
+    public int maxScore = Integer.parseInt(handleScore.readString());
 
     private TextureAtlas textureAtlas;
     private FPSLogger fpsLogger;
@@ -99,7 +100,6 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
     private final Rectangle scoreBoundingBox = new Rectangle();
 
     private int score;
-    public int highScore;
     private GlyphLayout actualScore;
     private GlyphLayout recordScore;
 
@@ -111,11 +111,6 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
         this.game = game;
 
     }
-
-    public PantallaPrincipal() {
-
-    }
-
     @Override
     public void show() {
         fpsLogger = new FPSLogger();       // Nos dice los frames por segundo a los que va el juego
@@ -248,8 +243,8 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
         counter = new GlyphLayout(game.fuenteScore, actualTimeString);
         maxTimePlayed = new GlyphLayout(game.fuenteScore, recordTime);
         // SCORE
+
         String scoreString = String.format("SCORE: %ds", score);
-        String maxScoreString = String.format("HIGHSCORE:%ds", highScore);
         actualScore = new GlyphLayout(game.fuenteScore, scoreString);
         recordScore = new GlyphLayout(game.fuenteScore, maxScoreString);
 
@@ -332,9 +327,10 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
             }
             if (score > maxScore) {
                 handleScore.writeString(Integer.toString(score), false);
+            }
 
             }
-        }
+
     }
 
     private void addPillar() {

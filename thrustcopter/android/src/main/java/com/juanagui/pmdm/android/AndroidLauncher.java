@@ -5,6 +5,7 @@ import android.os.Bundle;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
+import com.juanagui.pmdm.MainGame;
 import com.juanagui.pmdm.PantallaPrincipal;
 
 
@@ -14,6 +15,6 @@ public class AndroidLauncher extends AndroidApplication {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		AndroidApplicationConfiguration configuration = new AndroidApplicationConfiguration();
-		initialize( new PantallaPrincipal(), configuration);
+		initialize( new MainGame(), configuration);
 	}
 }
