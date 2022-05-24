@@ -35,8 +35,6 @@ public class GameOver extends ScreenAdapter {
     }
 
 
-
-
     @Override
     public void render(float delta) {
         Gdx.gl.glClearColor(255,0,0,0);
