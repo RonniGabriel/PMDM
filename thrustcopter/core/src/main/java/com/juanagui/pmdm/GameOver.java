@@ -28,7 +28,7 @@ public class GameOver extends ScreenAdapter {
 
                 if (keyCode == Input.Keys.ENTER) {
                     game.setScreen(new PantallaPrincipal(game));
-                    gameOverSound.stop();
+
             }else if  (keyCode == Input.Keys.ESCAPE){
                     System.exit(0);
                 }
@@ -58,6 +58,6 @@ public class GameOver extends ScreenAdapter {
     @Override
     public void hide() {
         Gdx.input.setInputProcessor(null);
-        gameOverSound.dispose();
+
     }
 }
