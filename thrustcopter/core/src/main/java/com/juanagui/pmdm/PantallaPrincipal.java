@@ -16,6 +16,7 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
+
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -25,7 +26,6 @@ import java.io.IOException;
 public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
 
     MainGame game;
-
     private static TextureRegion aboveGrassTextureRegion;
     private static TextureRegion belowGrassTextureRegion;
     // ATRIBUTOS
@@ -34,6 +34,7 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
     public static final float TERRAIN_SPEED_PPS = 200f;
     public static final float BACKGROUND_SPEED_PPS = 20;
     public static final float PLANE_TAP_SPEED = 200f;
+    public static final float PLANE_SPEED_PPS = 400f;
     public static final int GRAVITY = -8;
 
     //VARIABLES PARA ESCRIBIR EL TIEMPO MÁXIMO JUGADO (TIMER)
@@ -56,7 +57,6 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
 
     // ATLAS DE TEXTURAS
     private TextureRegion backgroundTextureRegion;
-
     private float terrainOffset = 0f;
     private float backgroundOffset = 0f;
 
@@ -87,9 +87,30 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
     private final Rectangle planeBoundingBox = new Rectangle();
     private final Rectangle pillarBoundingBox = new Rectangle();
 
+    // PUNTERO
+    private final Vector2 touchPosition = new Vector2();
+    private final Vector2 tmpVector = new Vector2();
+    private static final int TOUCH_IMPLUSE = 300;
+    private TextureRegion tapIndicator;
+    private TextureRegion tapToStart;
+    private float tapDrawTime;
+    private static final float TAP_DRAW_TIME_MAX = 1.0f;
+    // METEOR
+
+    private Array<TextureAtlas.AtlasRegion> meteorTextures = new Array<TextureAtlas.AtlasRegion>();
+    private TextureRegion selectedMeteorTexture;
+    private boolean meteorInScene;
+    private static final int METEOR_SPEED = 60;
+    private Vector2 meteorPosition = new Vector2();
+    private Vector2 meteorVelocity = new Vector2();
+    private float nextMeteorIn;
+    private Rectangle obstacleRectangle = new Rectangle();
+
     //MÚSICA
     private Music music;
     private Sound crashSound;
+    private Sound tapSound;
+    private Sound spawnSound;
 
     //TIMER
     float time = 0;
@@ -98,7 +119,6 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
 
     //SCORE
     private final Rectangle scoreBoundingBox = new Rectangle();
-
     private int score;
     private GlyphLayout actualScore;
     private GlyphLayout recordScore;
@@ -111,6 +131,7 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
         this.game = game;
 
     }
+
     @Override
     public void show() {
         fpsLogger = new FPSLogger();       // Nos dice los frames por segundo a los que va el juego
@@ -120,7 +141,7 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
         game.batch = new SpriteBatch();
 
         //TEXTURA ATLAS (CONTIENE TODAS LAS IMAGENES TEXTURAS EN UN SOLO DOCUMENTO)
-        textureAtlas = new TextureAtlas(Gdx.files.internal("ThrustCopter.pack  "));
+        textureAtlas = new TextureAtlas(Gdx.files.internal("ThrustCopter.atlas"));
         backgroundTextureRegion = textureAtlas.findRegion("background");
         //SUELO
         belowGrassTextureRegion = textureAtlas.findRegion("groundGrass");
@@ -149,13 +170,30 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
         // añadimos pilares
         addPillar();
 
-        // MUSICA
+        nextMeteorIn = (float) Math.random() * 5;
+        meteorInScene = false;
+
+        // MUSICA Y SONIDOS
         crashSound = Gdx.audio.newSound(Gdx.files.internal("sounds/crash.ogg"));
         music = Gdx.audio.newMusic(Gdx.files.internal("sounds/journey.mp3"));
         music.setLooping(true);
         music.play();
+        tapSound = Gdx.audio.newSound(Gdx.files.internal("sounds/pop.ogg"));
+        crashSound = Gdx.audio.newSound(Gdx.files.internal("sounds/crash.ogg"));
+        spawnSound = Gdx.audio.newSound(Gdx.files.internal("sounds/alarm.ogg"));
+
+        //METEORITOS
+
+        meteorTextures.add(textureAtlas.findRegion("meteorBrown_med1"));
+        meteorTextures.add(textureAtlas.findRegion("meteorBrown_med2"));
+        meteorTextures.add(textureAtlas.findRegion("meteorBrown_small1"));
+        meteorTextures.add(textureAtlas.findRegion("meteorBrown_small2"));
+        meteorTextures.add(textureAtlas.findRegion("meteorBrown_tiny1"));
+        // VULNERABILIDAD
+
 
         Gdx.input.setInputProcessor(this);
+
     }
 
     @Override
@@ -176,6 +214,8 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
 
     private void updateScene() throws IOException {
 
+        float deltaTIme = Gdx.graphics.getDeltaTime();
+
         // CESPED
         terrainOffset -= TERRAIN_SPEED_PPS * Gdx.graphics.getDeltaTime();
         if (terrainOffset <= -belowGrassTextureRegion.getRegionWidth()) {
@@ -189,8 +229,21 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
 
         // LE DAMOS UN TAMAÑO A LA CAJA DEL AVION PARA CUANDO CHOQUE CONTRA LA CAJA DEL PILAR
         planeBoundingBox.set(planePosition.x + 10, planePosition.y + 10, planeTextureRegion1.getRegionWidth() - 20, planeTextureRegion1.getRegionHeight() - 20);
+        // METEORITOS
+        if (meteorInScene){
+            meteorPosition.mulAdd(meteorVelocity,deltaTIme);
+            meteorPosition.x -=deltaTIme * METEOR_SPEED;
+            if(meteorPosition.x < -10){
+                meteorInScene = false;
+            }
+            obstacleRectangle.set(meteorPosition.x + 2, meteorPosition.y+2,selectedMeteorTexture.getRegionWidth()-4, selectedMeteorTexture.getRegionHeight()-4);
+            if(planeBoundingBox.overlaps(obstacleRectangle)){
+                crashSound.play();
+                gameOver();
 
+            }
 
+        }
         // CONDICIONAMOS QUE SI EL AVION LLEGA A LA POSICION DEL SUELO DE ARRIBA O DE ABAJO TERMINAMOS EL JUEGO
         if (planePosition.y > HEIGHT - aboveGrassTextureRegion.getRegionHeight() / 2f ||
                 planePosition.y < belowGrassTextureRegion.getRegionHeight() / 2f) {
@@ -223,13 +276,22 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
             //SCORE
             scoreBoundingBox.set(pillar.x + 10, 0, 1, HEIGHT);
             if (planeBoundingBox.overlaps(scoreBoundingBox)) {
-                score ++;
+                score++;
             }
         }
+        ;
 
         if (lastPillarPosition.x < NEW_PILLAR_POSITION_THRESHOLD) {
             addPillar();
         }
+        ;
+        //PUNTERO
+        tapDrawTime -= deltaTIme;
+        nextMeteorIn -= deltaTIme;
+        if (nextMeteorIn <= 0) {
+            launchMeteor();
+        }
+
 
         //BACKGORUND
         backgroundOffset -= BACKGROUND_SPEED_PPS * Gdx.graphics.getDeltaTime();
@@ -277,9 +339,6 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
                 game.batch.draw(pillarDown, pillar.x, HEIGHT - pillarDown.getRegionHeight());
             }
         }
-
-        // pintamos las texturas (QUE SACAMOS DEL ATLAS DE TEXTURAS)
-
         //TEXTURA QUE VEMOS EN PANTALLA
         game.batch.draw(aboveGrassTextureRegion, terrainOffset, HEIGHT - aboveGrassTextureRegion.getRegionHeight());
 
@@ -291,25 +350,25 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
 
         // TREXTURA QUE CONTINUA (NO VEMOS EN PANTALLA ARRIBA)
         game.batch.draw(belowGrassTextureRegion, terrainOffset + belowGrassTextureRegion.getRegionWidth(), 0);
-
-
-        //LAS TEXTURAS QUE NO VEMOS EN PANTALLA LAS USARESMO PARA GENERAR EL MOVIMIENTO DEL JUEGO
-
         // POSICION DEL AVION
         game.batch.draw(planeAnimation.getKeyFrame(planeAnimTime), planePosition.x, planePosition.y);
 
-        //TIMER
+        // COUNTER TIME & SCORE
         game.fuenteScore.draw(game.batch, counter, 600, HEIGHT - 430);
-
-        //TIEMPO MAXIMO JUGADO
         game.fuenteScore.draw(game.batch, maxTimePlayed, 600, HEIGHT - 400);
-
-        //SCORE
         game.fuenteScore.draw(game.batch, actualScore, 600, HEIGHT - 80);
-
-        //SCORE MAX
         game.fuenteScore.draw(game.batch, recordScore, 600, HEIGHT - 50);
 
+        // PUNTERO
+        if (tapDrawTime > 0) {
+            game.batch.draw(tapIndicator, touchPosition.x - tapIndicator.getRegionWidth() / 2f, touchPosition.y - tapIndicator.getRegionHeight() / 2f);
+        }
+
+        // METEORITOS
+
+        if (meteorInScene) {
+            game.batch.draw(selectedMeteorTexture, meteorPosition.x, meteorPosition.y);
+        }
 
         // CERRAMOS
         game.batch.end();
@@ -351,6 +410,24 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
         pillars.add(tmpPosition);
     }
 
+    private void launchMeteor() {
+        nextMeteorIn = 1.5f + (float) Math.random() * 5;
+        if (meteorInScene) {
+            return;
+        }
+        spawnSound.play();
+        meteorInScene = true;
+        int id = (int) (Math.random() + meteorTextures.size);
+        selectedMeteorTexture = textureAtlas.findRegion("shield_pickup");
+        meteorPosition.x = WIDTH + 5;
+        meteorPosition.y = (float) (80 + Math.random() * 320);
+        Vector2 destination = new Vector2();
+        destination.x = -10;
+        destination.y = (float) (80 + Math.random() * 320);
+        destination.sub(meteorPosition).nor();
+        meteorVelocity.mulAdd(destination, METEOR_SPEED);
+
+    }
 
     @Override
     public void hide() {
@@ -359,6 +436,7 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        tapSound.play();
         planeVelocity.add(0, PLANE_TAP_SPEED);
         return true;
     }

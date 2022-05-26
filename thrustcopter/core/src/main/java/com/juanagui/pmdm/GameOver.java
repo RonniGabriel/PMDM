@@ -5,11 +5,15 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 
 public class GameOver extends ScreenAdapter {
 
     MainGame game;
+
+    private Music gameOverSound ;
 
     public GameOver(MainGame game) {
         this.game = game;
@@ -24,6 +28,7 @@ public class GameOver extends ScreenAdapter {
 
                 if (keyCode == Input.Keys.ENTER) {
                     game.setScreen(new PantallaPrincipal(game));
+                    gameOverSound.stop();
             }else if  (keyCode == Input.Keys.ESCAPE){
                     System.exit(0);
                 }
@@ -45,6 +50,7 @@ public class GameOver extends ScreenAdapter {
         game.fuenteDos.draw(game.batch, "OH! HAS PERDIDO - GAMEOVER!", Gdx.graphics.getWidth() * .19f, Gdx.graphics.getHeight() * .75f);
         game.fuenteDos.draw(game.batch, "-> To Retry Press ENTER ", Gdx.graphics.getWidth() * .25f, Gdx.graphics.getHeight() * .25f);
         game.fuenteDos.draw(game.batch, "-> To Exit Press ESCAPE ", Gdx.graphics.getWidth() * .25f, Gdx.graphics.getHeight() * 0.15f);
+
         game.batch.end();
 
     }
@@ -52,5 +58,6 @@ public class GameOver extends ScreenAdapter {
     @Override
     public void hide() {
         Gdx.input.setInputProcessor(null);
+        gameOverSound.dispose();
     }
 }

@@ -2,6 +2,8 @@ package com.juanagui.pmdm;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -21,6 +23,8 @@ public class MainGame extends Game {
     BitmapFont fuenteScore;
 
 
+
+
     @Override
     public void create () {
         imgFondo = new Texture("welcomeScreen.png");
@@ -34,6 +38,8 @@ public class MainGame extends Game {
         fuenteDos.setColor(Color.YELLOW);
         fuenteUno.setColor(Color.MAGENTA);
         fuenteScore.setColor(Color.NAVY);
+
+
         setScreen(new PantallaMenu(this));
 
 
@@ -47,5 +53,7 @@ public class MainGame extends Game {
         fuenteUno.dispose();
         imgFondoEnd.dispose();
         imgFondo.dispose();
+
+
     }
 }
