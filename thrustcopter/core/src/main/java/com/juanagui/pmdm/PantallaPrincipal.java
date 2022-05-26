@@ -89,7 +89,6 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
 
     // METEORITOS
 
-    private Array<TextureAtlas.AtlasRegion> meteorTextures = new Array<TextureAtlas.AtlasRegion>();
     private TextureRegion selectedMeteorTexture;
     private boolean meteorInScreen;
     private static final int METEOR_SPEED = 60;
@@ -111,7 +110,7 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
     //MÚSICA
     private Music music;
     private Sound crashSound;
-    private Sound popSound;
+    private Sound shieldSound;
     private Sound tapSound;
 
     //TIMER
@@ -178,14 +177,8 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
         music.setLooping(true);
         music.play();
         tapSound = Gdx.audio.newSound(Gdx.files.internal("sounds/pop.ogg"));
+        shieldSound = Gdx.audio.newSound(Gdx.files.internal("sounds/star.ogg"));
 
-        popSound = Gdx.audio.newSound(Gdx.files.internal("sounds/pop.ogg"));
-        //METEORITO
-        meteorTextures.add(textureAtlas.findRegion("meteorBrown_med1"));
-        meteorTextures.add(textureAtlas.findRegion("meteorBrown_med2"));
-        meteorTextures.add(textureAtlas.findRegion("meteorBrown_small1"));
-        meteorTextures.add(textureAtlas.findRegion("meteorBrown_small2"));
-        meteorTextures.add(textureAtlas.findRegion("meteorBrown_tiny1"));
         // VULNERABILIDAD
         playerOnSafe = false;
         unbeatenTime = 0;
@@ -475,7 +468,7 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
             return;
         }
         shieldInScreen = true;
-        shieldTexture = textureAtlas.findRegion("shield_pickup");
+        shieldTexture = textureAtlas.findRegion("star_pickup");
         shieldPosition.x = PantallaPrincipal.WIDTH + 10;
         shieldPosition.y = (float) (80 + Math.random() * 320);
         Vector2 shieldDestination = new Vector2();
@@ -487,7 +480,7 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
 
     public void activateUnbeaten() {
         if (unbeatenTime == 0) {
-            popSound.play();
+            shieldSound.play();
         }
         playerOnSafe = true;
         unbeatenTime = 6f;

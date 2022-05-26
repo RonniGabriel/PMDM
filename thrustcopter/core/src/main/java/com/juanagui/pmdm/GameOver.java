@@ -13,8 +13,6 @@ public class GameOver extends ScreenAdapter {
 
     MainGame game;
 
-    private Music gameOverSound ;
-
     public GameOver(MainGame game) {
         this.game = game;
     }
