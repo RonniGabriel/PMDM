@@ -130,6 +130,7 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
     public PantallaPrincipal(MainGame game) {
         this.game = game;
     }
+
     @Override
     public void show() {
         fpsLogger = new FPSLogger();       // Nos dice los frames por segundo a los que va el juego
@@ -156,8 +157,6 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
         planeTextureRegion3 = textureAtlas.findRegion("planeRed3");
         planeAnimation = new Animation<>(0.05f, planeTextureRegion1, planeTextureRegion2, planeTextureRegion3, planeTextureRegion2);
         planeAnimation.setPlayMode(Animation.PlayMode.LOOP);
-
-
         //POSICION
         defaultPlanePosition = new Vector2(
                 planeTextureRegion1.getRegionWidth(),
@@ -188,19 +187,20 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
         planeVelocity = new Vector2();
 
         Gdx.input.setInputProcessor(this);
-        resetScene ();
+        resetScene();
     }
 
-    public void resetScene(){
+    public void resetScene() {
         terrainOffset = 0;
         planeAnimTime = 0;
-        planeVelocity.set(PantallaPrincipal.PLANE_SPEED_PPS,0);
+        planeVelocity.set(PantallaPrincipal.PLANE_SPEED_PPS, 0);
         pillars.clear();
         addPillar();
         shieldInScreen = false;
-        nextShield = (float)Math.random()*5;
+        nextShield = (float) Math.random() * 5;
 
     }
+
     @Override
     public void resize(int width, int height) {
         viewport.update(width, height);
@@ -255,12 +255,21 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
             if (shieldPosition.x < -20) {
                 shieldInScreen = false;
             }
-            //TODO: el segundo parámetro está mal calculado, usando shieldBoundingBox.y
-            shieldBoundingBox.set(shieldPosition.x + 2, shieldBoundingBox.y + 2, shieldTexture.getRegionWidth() - 4, shieldTexture.getRegionHeight() - 4);
+            shieldBoundingBox.set(shieldPosition.x + 2, shieldPosition.y + 2, shieldTexture.getRegionWidth() - 4, shieldTexture.getRegionHeight() - 4);
             if (planeBoundingBox.overlaps(shieldBoundingBox)) {
                 activateUnbeaten();
-                //TODO: cuando colisiones, oculta el escudo
+                playerOnSafe = true;
+
             }
+        }
+        if (unbeatenTime > 0) {
+            unbeatenTime -= deltaTIme;
+        } else {
+            unbeatenTime = 0;
+            playerOnSafe = false;
+        }
+        if ((planePosition.y > PantallaPrincipal.HEIGHT - PantallaPrincipal.aboveGrassTextureRegion.getRegionHeight() / 2f || planePosition.y < PantallaPrincipal.belowGrassTextureRegion.getRegionHeight() / 2f) && (!playerOnSafe && unbeatenTime == 0)) {
+            gameOver();
         }
 
         nextShield -= deltaTIme;
@@ -273,15 +282,7 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
             }
 
         }
-        if (unbeatenTime > 0) {
-            unbeatenTime -= deltaTIme;
-        } else {
-            unbeatenTime = 0;
-            playerOnSafe = false;
-        }
-        if ((planePosition.y > PantallaPrincipal.HEIGHT - PantallaPrincipal.aboveGrassTextureRegion.getRegionHeight() / 2f || planePosition.y < PantallaPrincipal.belowGrassTextureRegion.getRegionHeight() / 2f) && (!playerOnSafe && unbeatenTime == 0)) {
-            gameOver();
-        }
+
         // CONDICIONAMOS QUE SI EL AVION LLEGA A LA POSICION DEL SUELO DE ARRIBA O DE ABAJO TERMINAMOS EL JUEGO
         if (planePosition.y > HEIGHT - aboveGrassTextureRegion.getRegionHeight() / 2f ||
                 planePosition.y < belowGrassTextureRegion.getRegionHeight() / 2f) {
@@ -308,6 +309,7 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
                 //TODO: controlar el unbeaten aquí
                 gameOver(); //GAMEOVER
             }
+
 
             if (pillar.x < -pillarUp.getRegionWidth()) {
                 pillars.removeValue(pillar, true);
@@ -362,11 +364,11 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
         game.batch.draw(backgroundTextureRegion, backgroundOffset + backgroundTextureRegion.getRegionWidth(), 0);
         game.batch.draw(backgroundTextureRegion, backgroundOffset + 2 * backgroundTextureRegion.getRegionWidth(), 0);
         // ESCUDO
-        if (shieldInScreen && !playerOnSafe){
-            game.batch.draw(shieldTexture,shieldPosition.x,shieldPosition.y);
+        if (shieldInScreen && !playerOnSafe) {
+            game.batch.draw(shieldTexture, shieldPosition.x, shieldPosition.y);
         }
-        if (unbeatenTime > 0){
-            game.fuenteScore.draw(game.batch,"TIEMPO A SALVO:" + String.format("%.1f", unbeatenTime),PantallaPrincipal.WIDTH /2 + game.fuenteScore.getScaleX(), PantallaPrincipal.HEIGHT/2);
+        if (unbeatenTime > 0) {
+            game.fuenteScore.draw(game.batch, "TIEMPO A SALVO:" + String.format("%.1f", unbeatenTime), PantallaPrincipal.WIDTH / 2 + game.fuenteScore.getScaleX(), PantallaPrincipal.HEIGHT / 2);
         }
 
         // PILARES
@@ -400,13 +402,12 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
         // PUNTERO
 
 
-
         // METEORITOS
 
         if (meteorInScreen) {
             game.batch.draw(selectedMeteorTexture, meteorPosition.x, meteorPosition.y);
         }
-        game.batch.draw(planeAnimation.getKeyFrame(planeAnimTime),planePosition.x,planePosition.y);
+        game.batch.draw(planeAnimation.getKeyFrame(planeAnimTime), planePosition.x, planePosition.y);
 
         // CERRAMOS
         game.batch.end();
@@ -454,7 +455,7 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
             return;
         }
         meteorInScreen = true;
-        selectedMeteorTexture =  textureAtlas.findRegion("meteorBrown_small1");
+        selectedMeteorTexture = textureAtlas.findRegion("meteorBrown_small1");
         meteorPosition.x = WIDTH + 5;
         meteorPosition.y = (float) (80 + Math.random() * 320);
         Vector2 destination = new Vector2();
@@ -487,8 +488,7 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
             shieldSound.play();
         }
         playerOnSafe = true;
-        //TODO: 6f son solo 6 milisegundos
-        unbeatenTime = 6f;
+        unbeatenTime = 20f;
     }
 
     @Override
