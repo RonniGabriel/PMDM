@@ -242,6 +242,7 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
                 meteorInScreen = false;
             }
             obstacleRectangle.set(meteorPosition.x + 2, meteorPosition.y + 2, selectedMeteorTexture.getRegionWidth() - 4, selectedMeteorTexture.getRegionHeight() - 4);
+            //TODO: controlar el unbeaten aquí
             if (planeBoundingBox.overlaps(obstacleRectangle)) {
                 crashSound.play();
                 gameOver();
@@ -254,9 +255,11 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
             if (shieldPosition.x < -20) {
                 shieldInScreen = false;
             }
+            //TODO: el segundo parámetro está mal calculado, usando shieldBoundingBox.y
             shieldBoundingBox.set(shieldPosition.x + 2, shieldBoundingBox.y + 2, shieldTexture.getRegionWidth() - 4, shieldTexture.getRegionHeight() - 4);
             if (planeBoundingBox.overlaps(shieldBoundingBox)) {
                 activateUnbeaten();
+                //TODO: cuando colisiones, oculta el escudo
             }
         }
 
@@ -302,6 +305,7 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
 
             // VEMOS SI SE CHOCAN LOS RECTANGULOS (con el metodo overLaps())
             if (planeBoundingBox.overlaps(pillarBoundingBox)) {
+                //TODO: controlar el unbeaten aquí
                 gameOver(); //GAMEOVER
             }
 
@@ -483,6 +487,7 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
             shieldSound.play();
         }
         playerOnSafe = true;
+        //TODO: 6f son solo 6 milisegundos
         unbeatenTime = 6f;
     }
 
