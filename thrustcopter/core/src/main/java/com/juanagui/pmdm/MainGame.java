@@ -12,7 +12,6 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
 public class MainGame extends Game {
 
-
     SpriteBatch batch;
     ShapeRenderer shapeRenderer;
     Texture imgFondo;
@@ -21,9 +20,6 @@ public class MainGame extends Game {
     BitmapFont fuenteUno;
     BitmapFont fuenteDos;
     BitmapFont fuenteScore;
-
-
-
 
     @Override
     public void create () {
@@ -39,9 +35,7 @@ public class MainGame extends Game {
         fuenteUno.setColor(Color.MAGENTA);
         fuenteScore.setColor(Color.NAVY);
 
-
         setScreen(new PantallaMenu(this));
-
 
     }
 
@@ -53,7 +47,5 @@ public class MainGame extends Game {
         fuenteUno.dispose();
         imgFondoEnd.dispose();
         imgFondo.dispose();
-
-
     }
 }
