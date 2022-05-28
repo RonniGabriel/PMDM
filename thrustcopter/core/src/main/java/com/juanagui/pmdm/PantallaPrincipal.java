@@ -242,11 +242,15 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
                 meteorInScreen = false;
             }
             obstacleRectangle.set(meteorPosition.x + 2, meteorPosition.y + 2, selectedMeteorTexture.getRegionWidth() - 4, selectedMeteorTexture.getRegionHeight() - 4);
-            //TODO: controlar el unbeaten aquí
             if (planeBoundingBox.overlaps(obstacleRectangle)) {
-                crashSound.play();
-                gameOver();
+                //TODO: Sonidos
+                if(unbeatenTime>0){
+                    crashSound.play();
+                }else {
+                    gameOver(); //GAMEOVER
+                }
             }
+
         }
         //ESCUDOS
         if (shieldInScreen) {
@@ -268,9 +272,7 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
             unbeatenTime = 0;
             playerOnSafe = false;
         }
-        if ((planePosition.y > PantallaPrincipal.HEIGHT - PantallaPrincipal.aboveGrassTextureRegion.getRegionHeight() / 2f || planePosition.y < PantallaPrincipal.belowGrassTextureRegion.getRegionHeight() / 2f) && (!playerOnSafe && unbeatenTime == 0)) {
-            gameOver();
-        }
+
 
         nextShield -= deltaTIme;
         if (nextShield <= 0 && unbeatenTime == 0) {
@@ -303,14 +305,15 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
             } else {
                 pillarBoundingBox.set(pillar.x + 30, HEIGHT - pillarDown.getRegionHeight(), pillarDown.getRegionWidth() - 60, pillarDown.getRegionHeight());
             }
-
             // VEMOS SI SE CHOCAN LOS RECTANGULOS (con el metodo overLaps())
             if (planeBoundingBox.overlaps(pillarBoundingBox)) {
-                //TODO: controlar el unbeaten aquí
-                gameOver(); //GAMEOVER
+                //TODO: cambiar sonidos
+                if(unbeatenTime>0){
+                   crashSound.play();
+                }else {
+                    gameOver(); //GAMEOVER
+                }
             }
-
-
             if (pillar.x < -pillarUp.getRegionWidth()) {
                 pillars.removeValue(pillar, true);
             }
@@ -400,15 +403,11 @@ public class PantallaPrincipal extends ScreenAdapter implements InputProcessor {
         game.fuenteScore.draw(game.batch, recordScore, 600, HEIGHT - 50);
 
         // PUNTERO
-
-
         // METEORITOS
 
         if (meteorInScreen) {
             game.batch.draw(selectedMeteorTexture, meteorPosition.x, meteorPosition.y);
         }
-        game.batch.draw(planeAnimation.getKeyFrame(planeAnimTime), planePosition.x, planePosition.y);
-
         // CERRAMOS
         game.batch.end();
     }
